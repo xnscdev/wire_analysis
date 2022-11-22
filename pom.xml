@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+		http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>org.scijava</groupId>
+		<artifactId>pom-scijava</artifactId>
+		<version>31.1.0</version>
+		<relativePath />
+	</parent>
+
+	<groupId>com.github.xnscdev</groupId>
+	<artifactId>wire_analysis</artifactId>
+	<version>0.0.1</version>
+
+	<name>Wire Analysis</name>
+	<description>ImageJ command for nanowire size analysis.</description>
+	<url>https://github.com/xnscdev/wire_analysis</url>
+	<inceptionYear>2022</inceptionYear>
+	<organization>
+		<name>XNSC</name>
+		<url>https://github.com/xnscdev</url>
+	</organization>
+	<licenses>
+		<license>
+			<name>Apache License 2.0</name>
+			<url>https://www.apache.org/licenses/LICENSE-2.0</url>
+			<distribution>repo</distribution>
+		</license>
+	</licenses>
+
+	<developers>
+		<developer>
+			<id>xnscdev</id>
+			<name>XNSC</name>
+			<url>https://github.com/xnscdev</url>
+			<roles>
+				<role>founder</role>
+				<role>lead</role>
+				<role>developer</role>
+				<role>debugger</role>
+				<role>reviewer</role>
+				<role>support</role>
+				<role>maintainer</role>
+			</roles>
+		</developer>
+	</developers>
+	<contributors>
+		<contributor>
+			<name>None</name>
+		</contributor>
+	</contributors>
+	<mailingLists>
+		<mailingList>
+			<name>None</name>
+		</mailingList>
+	</mailingLists>
+
+	<scm>
+		<connection>scm:git:https://github.com/xnscdev/wire_analysis</connection>
+		<developerConnection>scm:git:git@github.com:xnscdev/wire_analysis</developerConnection>
+		<tag>HEAD</tag>
+		<url>https://github.com/xnscdev/wire_analysis</url>
+	</scm>
+	<issueManagement>
+		<system>GitHub Issues</system>
+		<url>https://github.com/xnscdev/wire_analysis/issues</url>
+	</issueManagement>
+	<ciManagement>
+		<system>None</system>
+	</ciManagement>
+
+	<properties>
+		<package-name>com.github.xnscdev.wa</package-name>
+		<main-class>com.github.xnscdev.wa.WireAnalysis</main-class>
+		<license.licenseName>apache_v2</license.licenseName>
+		<license.copyrightOwners>XNSC</license.copyrightOwners>
+	</properties>
+
+	<repositories>
+		<repository>
+			<id>scijava.public</id>
+			<url>https://maven.scijava.org/content/groups/public</url>
+		</repository>
+	</repositories>
+
+	<dependencies>
+		<dependency>
+			<groupId>net.imagej</groupId>
+			<artifactId>imagej</artifactId>
+		</dependency>
+	</dependencies>
+</project>
