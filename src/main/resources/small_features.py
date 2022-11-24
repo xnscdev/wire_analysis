@@ -1,7 +1,6 @@
 import cv2
 import matplotlib.pyplot as plt
 import numpy as np
-import os
 from shapely.geometry import Point, Polygon
 import sys
 
@@ -60,7 +59,7 @@ def flood(i, sx, sy, v, c, pm):
 
 
 def main(args):
-    img = cv2.imread(args[1], 0)
+    img = cv2.imread(args[1] + 'median.tif', 0)
     small_dmap = np.zeros(img.shape, dtype=np.float64)
     particles = []
     visited = np.zeros(img.shape, dtype=bool)
@@ -91,11 +90,10 @@ def main(args):
     plt.title('Small feature size distribution')
     plt.xlabel('Average Diameter (nm)')
     plt.ylabel('Frequency')
-    base = os.path.join(args[3], os.path.basename(args[1]).replace('_median.tif', ''))
-    plt.savefig(base + '_small_dist.tif', bbox_inches='tight')
-    with open(base + '_small_features.npy', 'wb') as f:
+    plt.savefig(args[1] + 'small_dist.tif', bbox_inches='tight')
+    with open(args[1] + 'small_features.npy', 'wb') as f:
         np.save(f, small_dmap)
-    cv2.imwrite(base + '_wires.tif', rem)
+    cv2.imwrite(args[1] + 'wires.tif', rem)
 
 
 if __name__ == '__main__':

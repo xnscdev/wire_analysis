@@ -1,6 +1,7 @@
 package com.github.xnscdev.wa;
 
 import io.scif.config.SCIFIOConfig;
+import io.scif.img.ImgOpener;
 import io.scif.img.ImgSaver;
 import net.imagej.Dataset;
 import net.imagej.ImageJ;
@@ -24,6 +25,7 @@ import java.util.stream.Stream;
 
 @Plugin(type = Command.class, menuPath = "Plugins>Wire Analysis")
 public class WireAnalysis<T extends RealType<T>> implements Command {
+    private final ImgOpener opener = new ImgOpener();
     private final ImgSaver saver = new ImgSaver();
     private final SCIFIOConfig config = new SCIFIOConfig();
 
@@ -49,21 +51,21 @@ public class WireAnalysis<T extends RealType<T>> implements Command {
     @Parameter(label = "Pixels per micrometer")
     private int pixelsPerMicro;
 
+    @Parameter(label = "Morphological iterations")
+    private int iterations;
+
+    @Parameter(label = "Additional morphological iterations")
+    private int extraIterations;
+
     @Override
     public void run() {
         @SuppressWarnings("unchecked")
         ImgPlus<T> image = (ImgPlus<T>) currentData.getImgPlus();
         medianThreshold(image);
-        runPython("small_features", getProcessedImagePath(image, "median"), String.valueOf(pixelsPerMicro), outputDir.getAbsolutePath());
+        runPython("small_features", getProcessedPathPrefix(image, ""), String.valueOf(pixelsPerMicro));
         segmentation(image);
-    }
-
-    private String getProcessedImageName(ImgPlus<T> image, String suffix) {
-        return image.getName().replace(".tif", "_" + suffix + ".tif");
-    }
-
-    private String getProcessedImagePath(ImgPlus<T> image, String suffix) {
-        return outputDir.getAbsolutePath() + File.separator + getProcessedImageName(image, suffix);
+        wireRegions(image);
+        runPython("large_features", getProcessedPathPrefix(image, ""), String.valueOf(iterations), String.valueOf(extraIterations), String.valueOf(pixelsPerMicro));
     }
 
     private void medianThreshold(ImgPlus<T> image) {
@@ -76,7 +78,7 @@ public class WireAnalysis<T extends RealType<T>> implements Command {
         for (UnsignedByteType pixel : converted) {
             pixel.mul(255);
         }
-        String name = getProcessedImageName(image, "median");
+        String name = getProcessedImagePrefix(image, "median.tif");
         saveImage(name, converted);
         uiService.show(name, converted);
     }
@@ -87,13 +89,20 @@ public class WireAnalysis<T extends RealType<T>> implements Command {
         for (UnsignedByteType pixel : converted) {
             pixel.mul(255);
         }
-        String name = getProcessedImageName(image, "seg");
+        String name = getProcessedImagePrefix(image, "seg.tif");
         saveImage(name, converted);
     }
 
-    private void saveImage(String name, Img<? extends RealType<?>> converted) {
-        FileLocation loc = new FileLocation(new File(outputDir, name));
-        saver.saveImg(loc, converted, config);
+    private void wireRegions(ImgPlus<T> image) {
+        @SuppressWarnings("unchecked")
+        Img<T> segmented = (Img<T>) opener.openImgs(getProcessedPathPrefix(image, "seg.tif")).get(0);
+        @SuppressWarnings("unchecked")
+        Img<T> wires = (Img<T>) opener.openImgs(getProcessedPathPrefix(image, "wires.tif")).get(0);
+        Img<T> subtracted = wires.factory().create(wires);
+        opService.math().subtract(subtracted, segmented, (IterableInterval<T>) wires);
+        String name = getProcessedImagePrefix(image, "wires_seg.tif");
+        saveImage(name, subtracted);
+        uiService.show(name, subtracted);
     }
 
     private void runPython(String name, String... args) {
@@ -122,6 +131,19 @@ public class WireAnalysis<T extends RealType<T>> implements Command {
         catch (IOException | InterruptedException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private String getProcessedImagePrefix(ImgPlus<T> image, String suffix) {
+        return image.getName().replace(".tif", "_" + suffix);
+    }
+
+    private String getProcessedPathPrefix(ImgPlus<T> image, String suffix) {
+        return outputDir.getAbsolutePath() + File.separator + getProcessedImagePrefix(image, suffix);
+    }
+
+    private void saveImage(String name, Img<? extends RealType<?>> converted) {
+        FileLocation loc = new FileLocation(new File(outputDir, name));
+        saver.saveImg(loc, converted, config);
     }
 
     public static void main(String[] args) throws Exception {
